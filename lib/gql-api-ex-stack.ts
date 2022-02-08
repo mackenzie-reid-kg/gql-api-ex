@@ -1,16 +1,21 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as cdk from 'aws-cdk-lib'
+import * as lambda from 'aws-cdk-lib/aws-lambda-nodejs'
+import * as apigw from 'aws-cdk-lib/aws-apigateway'
 
-export class GqlApiExStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
-    super(scope, id, props);
+export class GqlApiExStack extends cdk.Stack {
+    constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+        super(scope, id, props);
 
-    // The code that defines your stack goes here
+        // Create a new lambda from node js function 
+        const graphqlHandler = new lambda.NodejsFunction(this, 'GraphqlHandler', {
+            entry: 'src/index.js',
+            handler: 'handler' // This defaults btw, just explicitly setting it
+        })
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'GqlApiExQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
-  }
+        // Connect handler to apigw
+        new apigw.LambdaRestApi(this, 'GraphqlEndpoint', {
+            handler: graphqlHandler
+        })
+
+    }
 }
